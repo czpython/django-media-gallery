@@ -1,0 +1,118 @@
+{% extends "gallery/base.html" %}
+{% block extra-style %}
+<link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="{{ STATIC_URL }}plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css" type="text/css" />
+{% endblock extra-style %}
+{% block content %}
+<form id="upload-form" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
+    <div class="row">
+        <div class="span7">
+            <span id="add-files" class="btn btn-success fileinput-button">
+                <i class="icon-plus icon-white"></i>
+                <span>Add files...</span>
+            </span>
+            <button type="submit" id="form-submit" class="btn btn-primary start">
+                <i class="icon-upload icon-white"></i>
+                <span>Start upload</span>
+            </button>
+            <button type="reset" class="btn btn-warning cancel">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>Cancel upload</span>
+            </button>
+        </div>
+    </div>
+    <div id="upload">
+        <div id="upload-container2">
+            <div id="upload-border">
+                <div id="upload-container">
+                    <img src="{{ STATIC_URL }}testimage.jpg" width="441" height="369" />
+                </div>
+            </div>
+        </div>
+        <div class="progress progress-striped">
+            <div class="bar"></div>
+        </div>
+        <div class="span5 fileupload-progress fade">
+            <!-- The global progress bar -->
+            <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                <div class="bar" style="width:0%;"></div>
+            </div>
+        </div>
+        <table class="table table-striped">
+            <tbody id="files">
+            </tbody>
+        </table>
+    </div>
+ </form>
+{% endblock content %}
+
+{% block js %}
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}plupload/js/plupload.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}plupload/js/plupload.html4.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}plupload/js/plupload.html5.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}plupload/js/jquery.ui.plupload/jquery.ui.plupload.js"></script> 
+<script type="text/javascript">
+$(function() {
+    var uploader = new plupload.Uploader({
+        // General settings
+        runtimes : 'html5, html4',
+        url : '{% url uploadit-upload-image %}',
+        max_file_size : '1000mb',
+        max_file_count: 100,
+        browse_button: 'add-files',
+        drop_element: 'upload-container',
+        chunk_size : '1mb',
+        container : 'upload',
+        unique_names : true,
+        multiple_queues : true,
+        // Specify what files to browse for
+        filters : [
+            {title : "Image files", extensions : "jpg,png,jpeg"},
+        ],
+    });
+
+    uploader.init();
+
+    $('#form-submit').submit(function(e) {
+        // Don't submit the form yet :)
+        e.preventDefault();
+        if(uploader.total.queued != 0) {
+            uploader.start();
+        }
+        
+    });
+
+    uploader.bind('FilesAdded', function(up, files) {
+        $.each(files, function(i, file) {
+            $('#files').append(
+                '<tr id="'+file.id+'"><td>'+file.name+'</td>'+
+                '<td>'+plupload.formatSize(file.size)+'</td>'+
+                '<td class="cancel"><button class="btn btn-warning"><i class="icon-ban-circle icon-white"></i>Cancel</button></td></tr>'
+            );
+            $('.cancel').click(function(e) {
+                e.preventDefault();
+                uploader.removeFile(file);
+                $('#' + file.id).remove();
+            });
+        });
+    });
+
+    uploader.bind('UploadProgress', function(up, file) {
+        $(".bar").css("width", up.total.percent);
+    });
+
+    uploader.bind('UploadComplete', function(up, files){
+        {% url uploadit-upload-images %}
+    });
+
+    uploader.bind('Error', function(up, err) {
+        $('#filelist').append("<div>Error: " + err.code +
+            ", Message: " + err.message +
+            (err.file ? ", File: " + err.file.name : "") +
+            "</div>"
+        );
+    });
+});
+</script>
+{% endblock js %}

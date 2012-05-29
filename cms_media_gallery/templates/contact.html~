@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% load cms_tags menu_tags %}
+{% block content %}
+<div class="wrap-left" id="content-block" style="width:550px;"> 
+<h4>Contact Us</h4> 
+				<p>Email: <a href="mailto:info@neoximage.com">info@neoximage.com</a></p> 
+				<p>Phone: 305.576.7225</p> 
+				<p>250 NW 23rd St. Unit 204</p>
+				<p>Miami FL, 33127</p>
+</div>
+{% endblock %}

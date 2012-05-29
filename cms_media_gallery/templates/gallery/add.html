@@ -1,0 +1,27 @@
+{% extends "gallery/base.html" %}
+{% block title %}Creat a Gallery{% endblock %}
+{% block content %}
+<form action="" class=".form-vertical" method="post">{% csrf_token %}
+	<fieldset>
+		{% for field in form %}
+		<div class="control-group {% if field.errors %}error{% endif %}">
+			{{ field.label_tag }}
+			<div class="controls">
+				{{ field }}
+				{% if field.help_text %}
+				<p class="help-block">{{ field.help_text }}</p>
+				{% endif %}
+			</div>
+			{{ field.errors }}
+		</div>
+		{% endfor %}
+  </fieldset>
+    <input type="submit" class="btn btn-large btn-primary" value="Create" />
+</form>
+{% endblock %}
+{% block js %}
+<script type="text/javascript" src="{{ STATIC_URL }}jQuery-Slugify-Plugin/jquery.slugify.js"></script>
+<script type="text/javascript">
+	$('#id_slug').slugify('#id_name');
+</script>
+{% endblock js %}
