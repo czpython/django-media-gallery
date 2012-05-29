@@ -1,3 +1,5 @@
+import ipdb
+
 from django.utils import simplejson
 from django.contrib import messages
 from django.core.urlresolvers import reverse
@@ -9,9 +11,14 @@ from django.conf import settings
 
 from sorl.thumbnail import delete
 
+from celery.result import TaskSetResult
+
+from uploadit.tasks import upload_images as image_uploader
+
 from cms_media_gallery.models import Gallery
 from cms_media_gallery.forms import GalleryForm
 
+UPLOADIT_TEMP_FILES = settings.UPLOADIT_TEMP_FILES
 
 def create_gallery(request):
     form = GalleryForm(request.POST or None)
@@ -31,6 +38,21 @@ def edit_gallery(request, slug):
 
 def upload_images(request, slug):
     gallery = get_object_or_404(Gallery, pk=slug)
+    try:
+        del request.session['uploadit-%s' % gallery.slug]
+    except KeyError:
+        pass
+    taskset_id = request.session.get('uploadit-%s' % gallery.slug, False)
+    if taskset_id:
+        result = TaskSetResult(taskset_id)
+        if request.POST:
+            messages.warning(request, 'Please wait a few minutes until your previously submitted files have been uploaded.')
+        else:
+            messages.warning(request, "I'm are currently uploading some files, give it some time until you upload again.")
+    elif request.POST:
+        task = image_uploader(gallery, gallery.created_on, UPLOADIT_TEMP_FILES)
+        request.session['uploadit-%s' % gallery.slug] = task.taskset_id
+        messages.success(request, 'Your files have been submitted succesfully.')
     return render_to_response('gallery/upload_images.html', 
                                 {'gallery': gallery},
                                 context_instance=RequestContext(request))
