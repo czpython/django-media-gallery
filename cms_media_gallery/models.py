@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.contenttypes import generic
 
 from uploadit.models import UploadedFile
 
