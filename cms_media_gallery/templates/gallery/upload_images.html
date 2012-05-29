@@ -70,6 +70,7 @@ $(function() {
         filters : [
             {title : "Image files", extensions : "jpg,png,jpeg"},
         ],
+        multipart_params: {pk: "{{ gallery.pk }}"}
     });
 
     uploader.init();
@@ -103,7 +104,17 @@ $(function() {
     });
 
     uploader.bind('UploadComplete', function(up, files){
-        {% url uploadit-upload-images %}
+        $.getJSON("{% url uploadit-upload-images %}", {pk: "{{ gallery.pk }}"}, function(data) {
+            if(data===0){
+                html = '<div class="alert alert-error"><button class="close" data-dismiss="alert">×</button>Oops something went wrong, image was not uploaded.</div>'
+            }
+            else{
+                    html = '<div class="alert alert-success"><button class="close" data-dismiss="alert">×</button>Your images have been submited, please allow sometime for them to process.</div>'
+            }
+            $(html).prependTo($('.container'));
+            }
+            {}
+        );
     });
 
     uploader.bind('Error', function(up, err) {
