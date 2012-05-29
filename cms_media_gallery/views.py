@@ -14,6 +14,7 @@ from sorl.thumbnail import delete
 from celery.result import TaskSetResult
 
 from uploadit.tasks import upload_images as image_uploader
+from uploadit.models import UploadedFile
 
 from cms_media_gallery.models import Gallery
 from cms_media_gallery.forms import GalleryForm
@@ -38,15 +39,19 @@ def edit_gallery(request, slug):
 
 def upload_images(request, slug):
     gallery = get_object_or_404(Gallery, pk=slug)
-    try:
-        del request.session['uploadit-%s' % gallery.slug]
-    except KeyError:
-        pass
     taskset_id = request.session.get('uploadit-%s' % gallery.slug, False)
     if taskset_id:
-        result = TaskSetResult(taskset_id)
-        if request.POST:
-            messages.warning(request, 'Please wait a few minutes until your previously submitted files have been uploaded.')
+        result = TaskSetResult.restore(taskset_id)
+        if result.ready() and result.successful():
+            # Remove the old task id and result
+            del request.session['uploadit-%s' % gallery.slug]
+            result.delete()
+            if request.POST:
+                task = image_uploader(gallery, gallery.created_on, UPLOADIT_TEMP_FILES)
+                request.session['uploadit-%s' % gallery.slug] = task.taskset_id
+                messages.success(request, 'Your files have been submitted succesfully.')
+            else:
+                messages.success(request, 'Your files have been uploaded succesfully.')
         else:
             messages.warning(request, "I'm are currently uploading some files, give it some time until you upload again.")
     elif request.POST:
@@ -62,16 +67,15 @@ def delete_image(request, slug, img):
     gallery = get_object_or_404(Gallery, pk=slug)
     data = {"success" : "1"}
     try:
-        picture = gallery.pictures.get(pk=img)
-    except Picture.DoesNotExist:
+        file_ = gallery.pictures.get(pk=img)
+    except UploadedFile.DoesNotExist:
         data['success'] = "0"
     else:
         # Need to delete the thumbnail Key Value Store reference
-        delete(picture.image)
-        picture.delete()
-    response = JSONResponse([data], {}, response_mimetype(request))
-    response['Content-Disposition'] = 'inline; filename=files.json'
-    return response
+        delete(file_.file)
+        file_.delete()
+    response = simplejson.dumps(data)
+    return HttpResponse(response, mimetype='application/json')
 
 
 
