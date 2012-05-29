@@ -10,7 +10,7 @@ setup(
     author_email="commonzenpython@gmail.com",
     url="http://github.com/czpython/django-cms-media-gallery",
     packages=['cms_media_gallery'],
-    dependency_links = ['https://github.com/czpython/django-uploadit/tarball/master#egg=uploadit']
+    dependency_links = ['https://github.com/czpython/django-uploadit/tarball/master#egg=uploadit'],
     install_requires=[
         'pylibmc',
         'django-pylibmc',
