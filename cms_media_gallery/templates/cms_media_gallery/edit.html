@@ -1,7 +1,8 @@
-{% extends "gallery/base.html" %}
+{% extends "cms_media_gallery/base.html" %}
 {% load thumbnail %}
 {% block extra-style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
+<link rel="stylesheet" href="{{ STATIC_URL }}iphone-style-checkboxes/css/style.css">
 {% endblock extra-style %}
 {% block title %}Edit a Gallery{% endblock %}
 {% block content %}
@@ -38,6 +39,16 @@
 {% block js %}
 <script type="text/javascript" src="{{ STATIC_URL }}jQuery-Slugify-Plugin/jquery.slugify.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}Impromptu/js/jquery-impromptu.4.0.min.js"></script>
+<script src="{{ STATIC_URL }}iphone-style-checkboxes/js/iphone-style-checkboxes.js" type="text/javascript"></script>
+<script type="text/javascript"> 
+    $(document).ready(function (){ 
+        $(':checkbox').iphoneStyle({
+            onChange: function(elem, value) {
+                $.getJSON("{% url gallery-publish gallery.slug %}", {publish:value.toString()});
+            }
+        });
+    }); 
+</script>
 <script type="text/javascript">
     $('#id_slug').slugify('#id_name');
     $(".thumbnail a").click(function (event) {
