@@ -9,6 +9,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.views.decorators.cache import never_cache
+from django.db import transaction
 
 from sorl.thumbnail import delete
 
@@ -27,6 +28,18 @@ try:
     CMS_MEDIA_GALLERY_PAGE = settings.CMS_MEDIA_GALLERY_PAGE
 except AttributeError:
     raise ImproperlyConfigured("Please create a page for CMS_MEDIA_GALLERY and add its reverse_id to settings.CMS_MEDIA_GALLERY_PAGE")
+
+
+@never_cache
+def dashboard(request):
+    """
+        Dislays all galleries that have images.
+    """
+
+    galleries = CMSMediaGallery.objects.with_images()
+    return render_to_response('cms_media_gallery/dashboard.html', 
+        {'galleries': galleries}, context_instance=RequestContext(request))
+
 
 
 def create_gallery(request):
@@ -57,7 +70,7 @@ def edit_gallery(request, slug):
         parent = get_or_create_page(
             parent=dict(reverse_id=CMS_MEDIA_GALLERY_PAGE), 
             child=form.cleaned_data['parent'], 
-            template='cms_media_gallery/set.html'
+            template='cms_media_gallery/gallery.html'
         )
         # And here i move the gallery to the newly created page.
         # Nothing happens ( as far as i know ) if i move it to the same location.
@@ -70,7 +83,11 @@ def upload_images(request, slug):
     taskset_id = request.session.get('uploadit-%s' % gallery.slug, False)
     if taskset_id:
         result = TaskSetResult.restore(taskset_id)
-        if result.ready() and result.successful():
+        if result.failed():
+            del request.session['uploadit-%s' % gallery.slug]
+            result.delete()
+            messages.error(request, "Oops, We have encountered an error while uploading your file. Please try again later...")
+        elif result.ready() and result.successful():
             # Remove the old task id and result
             del request.session['uploadit-%s' % gallery.slug]
             result.delete()
@@ -88,6 +105,17 @@ def upload_images(request, slug):
                                 {'gallery': gallery},
                                 context_instance=RequestContext(request))
 
+@transaction.commit_on_success
+def delete_gallery(request, slug):
+    gallery = get_object_or_404(CMSMediaGallery, pk=slug)
+    data = {"success" : "1"}
+    for file_ in gallery.pictures.all():
+        delete(file_.file)
+    gallery.delete()
+    response = simplejson.dumps(data)
+    return HttpResponse(response, mimetype='application/json')
+
+
 def delete_image(request, slug, img):
     gallery = get_object_or_404(CMSMediaGallery, pk=slug)
     data = {"success" : "1"}
@@ -101,6 +129,7 @@ def delete_image(request, slug, img):
         file_.delete()
     response = simplejson.dumps(data)
     return HttpResponse(response, mimetype='application/json')
+
 
 @never_cache
 def publish_gallery(request, slug):

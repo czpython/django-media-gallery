@@ -1,0 +1,53 @@
+{% extends "cms_media_gallery/base.html" %}
+{% load thumbnail %}
+{% block extra-style %}
+<link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
+{% endblock extra-style %}
+{% block title %}Dasboard{% endblock %}
+{% block content %}
+<ul class="thumbnails">
+{% for gallery in galleries %}
+{% thumbnail gallery.thumbail.file "200x200" crop="center" as im %}
+    <li class=".span3">
+    <div class="thumbnail">
+        <a class="delete" href="{% url gallery-delete gallery.slug %}"><i class="icon-trash"></i></a>
+        <a class "edit" href="{% url gallery-edit gallery.slug %}">
+            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" />
+        </a>
+    </div>
+    </li>
+{% endthumbnail %}
+{% endfor %}
+</ul>
+{% endblock %}
+{% block js %}
+<script type="text/javascript" src="{{ STATIC_URL }}Impromptu/js/jquery-impromptu.4.0.min.js"></script>
+<script type="text/javascript">
+    $(".thumbnail a.delete").click(function (event) {
+        event.preventDefault();
+        var atag = $(this);
+        var link = atag.attr("href");
+        $.prompt("Do you really want to delete this gallery ?", {
+            buttons: { Yes: 1, No: 0 },
+            submit:function(e,v,m,f){
+                if(v===0){
+                    $.prompt.close();
+                }
+                else if(v===1){
+                    $.getJSON(link, function(data) {
+                        if(data===0){
+                            html = '<div class="alert alert-error"><button class="close" data-dismiss="alert">×</button>Oops something went wrong, gallery was not deleted.</div>'
+                        }
+                        else{
+                                html = '<div class="alert alert-success"><button class="close" data-dismiss="alert">×</button>Your gallery has been deleted successfully.</div>'
+                                atag.parent('div').parent('li').remove()
+                            }
+                        $(html).prependTo($('.container'));
+                    });
+                    return true;
+                }
+            }
+        });
+    });
+</script>
+{% endblock js %}

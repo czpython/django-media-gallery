@@ -13,6 +13,7 @@ def encode_string(string):
     """
     return base64.b64encode(string)
 
+
 def decode_string(string):
     return base64.b64decode(string)
 
@@ -28,7 +29,8 @@ def get_or_create_page(parent, child, template):
             template=template, 
             language='en', 
             parent=parent)
-        return page
+    return page
+
 
 def cms_recursive_publish(page, user):
     """

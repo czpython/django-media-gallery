@@ -14,6 +14,11 @@
 </head>
 <body>
     <div class="container">
+        <ul class="breadcrumb">
+            <li>
+                <a href="{% url gallery-dashboard %}">Dashboard</a>
+            </li>
+        </ul>
         {% if messages %}
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}">
