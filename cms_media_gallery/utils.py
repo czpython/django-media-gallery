@@ -31,7 +31,7 @@ def get_or_create_page(parent, child, template):
     return page
 
 
-page cms_recursive_publish(page, user):
+def page cms_recursive_publish(page, user):
     """
         Small wrapper of django-cms publish.
     """
