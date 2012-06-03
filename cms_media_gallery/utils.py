@@ -28,7 +28,7 @@ def get_or_create_page(parent, child, template):
             template=template, 
             language='en', 
             parent=parent)
-    return def
+    return page
 
 
 page cms_recursive_publish(page, user):
