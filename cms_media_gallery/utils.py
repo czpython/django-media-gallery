@@ -17,18 +17,27 @@ def encode_string(string):
 def decode_string(string):
     return base64.b64decode(string)
 
-
-def get_or_create_page(parent, child, template):
-    if isinstance(parent, dict):
-        parent = Page.objects.get(**parent)
-    try:
-        page = parent.children.get(title_set__title=child)
-    except parent.children.model.DoesNotExist:
-        # Create the parent page if it doesn't exist
-        page = create_page(title=child, 
-            template=template, 
-            language='en', 
-            parent=parent)
+def get_or_create_page(page, template, parent=None):
+    if not instance(page, dict):
+        raise TypeError('Parent needs to be a dict or Page instance')
+    if parent is not None:
+        if isinstance(parent, dict):
+            parent = Page.objects.get(**parent)
+        elif not isinstance(parent, Page):
+            raise TypeError('Parent needs to be a dict or Page instance')
+        try:
+            new = parent.children.get(title_set__title=page)
+        except parent.children.model.DoesNotExist:
+            # Create the parent page if it doesn't exist
+            page = create_page(title=page, 
+                template=template, 
+                language='en', 
+                parent=parent)
+    else:
+        try:
+            new = Page.objects.get(title_set__title=page)
+        except Page.title_set.model.DoesNotExist:
+            pass
     return page
 
 
