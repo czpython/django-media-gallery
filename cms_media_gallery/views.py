@@ -21,6 +21,7 @@ from uploadit.models import UploadedFile
 from cms_media_gallery.models import CMSMediaGallery
 from cms_media_gallery.forms import GalleryForm
 from cms_media_gallery.utils import get_or_create_page, cms_recursive_publish
+from cms_media_gallery import signals
 
 UPLOADIT_TEMP_FILES = settings.UPLOADIT_TEMP_FILES
 
@@ -54,6 +55,7 @@ def create_gallery(request):
         page = get_or_create_page(parent, instance.name, template='cms_media_gallery/gallery.html', )
         instance.cms_page = page
         instance.save()
+        signals.media_gallery_created.send(sender=None, gallery=instance)
         messages.success(request, 'Your gallery has been succesfully created. Now add images to it :)')
         return HttpResponseRedirect(reverse('gallery-upload-images', args=[instance.pk]))
     return render_to_response('cms_media_gallery/add.html', {'form': form}, context_instance=RequestContext(request))
