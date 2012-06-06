@@ -38,7 +38,7 @@ class CMSMediaGallery(models.Model):
                 return self._thumbail
 
     def get_picture_positions(self):
-        pictures = self.pictures.all()
+        pictures = self.pictures.all().order_by('id')
         positions = {}
         for pos, picture in enumerate(pictures):
             positions[picture.id] = pos
