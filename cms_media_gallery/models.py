@@ -41,7 +41,8 @@ class CMSMediaGallery(models.Model):
         pictures = self.pictures.all().order_by('id')
         positions = {}
         for pos, picture in enumerate(pictures):
-            positions[picture.id] = pos
+            # 1 indexed
+            positions[picture.id] = pos + 1
         return positions
 
 
