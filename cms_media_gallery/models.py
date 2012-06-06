@@ -24,6 +24,7 @@ class CMSMediaGallery(models.Model):
     @property
     def get_pictures(self):
         return self.pictures.all()
+
     @property
     def thumbail(self):
         """
@@ -35,6 +36,14 @@ class CMSMediaGallery(models.Model):
             if self.pictures is not None:
                 self._thumbail = random.choice(self.pictures.all())
                 return self._thumbail
+
+    def get_picture_positions(self):
+        pictures = self.pictures.all()
+        positions = {}
+        for pos, picture in enumerate(pictures):
+            positions[picture.id] = pos
+        return positions
+
 
 
     def __unicode__(self):
