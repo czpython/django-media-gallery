@@ -1,4 +1,4 @@
-{% extends "cms_media_gallery/base.html" %}
+{% extends "media-gallery/base.html" %}
 {% block extra-style %}
 <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <link rel="stylesheet" href="{{ STATIC_URL }}plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css" type="text/css" />
@@ -91,9 +91,9 @@ $(function() {
             $('#files').append(
                 '<tr id="'+file.id+'"><td>'+file.name+'</td>'+
                 '<td>'+plupload.formatSize(file.size)+'</td>'+
-                '<td class="cancel"><button class="btn btn-warning"><i class="icon-ban-circle icon-white"></i>Cancel</button></td></tr>'
+                '<td class="cancel-' + file.id +'"><button class="btn btn-warning"><i class="icon-ban-circle icon-white"></i>Cancel</button></td></tr>'
             );
-            $('.cancel').click(function(e) {
+            $('.cancel-' + file.id).click(function(e) {
                 e.preventDefault();
                 uploader.removeFile(file);
                 $('#' + file.id).remove();

@@ -1,9 +1,9 @@
-{% extends "cms_media_gallery/base.html" %}
+{% extends "media-gallery/base.html" %}
 {% block title %}Creat a Gallery{% endblock %}
 {% block content %}
 <form action="" class=".form-vertical" method="post">{% csrf_token %}
 	<fieldset>
-		{% for field in form %}
+		{% for field in form.visible_fields %}
 		<div class="control-group {% if field.errors %}error{% endif %}">
 			{{ field.label_tag }}
 			<div class="controls">
@@ -16,6 +16,9 @@
 		</div>
 		{% endfor %}
   </fieldset>
+   	{% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
     <input type="submit" class="btn btn-large btn-primary" value="Create" />
 </form>
 {% endblock %}

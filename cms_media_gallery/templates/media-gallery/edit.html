@@ -1,5 +1,5 @@
-{% extends "cms_media_gallery/base.html" %}
-{% load thumbnail cms_tags menu_tags %}
+{% extends "media-gallery/base.html" %}
+{% load thumbnail %}
 {% block extra-style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
 <link rel="stylesheet" href="{{ STATIC_URL }}iphone-style-checkboxes/css/style.css">
@@ -23,13 +23,12 @@
   </fieldset>
     <input type="submit" class="btn btn-large btn-primary" value="Done" />
 </form>
-{% if not gallery.cms_page.published %}
+{% if not gallery.published %}
 <p>Preview your gallery here</p>
-<a href="{% page_url gallery.cms_page %}?preview">{{ gallery.name }}</a>
 {% else %}
 <p>View your gallery live !!!</p>
-<a href="{% page_url gallery.cms_page %}">{{ gallery.name }}</a>
 {% endif %}
+<a href="{% url media-gallery gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
 <ul class="thumbnails">
 {% for picture in gallery.get_pictures %}
 {% thumbnail picture.file "200x200" crop="center" as im %}

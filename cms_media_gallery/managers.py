@@ -1,6 +1,6 @@
 from django.db import models
 
-class CMSMediaGalleryManager(models.Manager):
+class MediaGalleryManager(models.Manager):
 	"""
 		Default manager wrapper for CMSMediaGallery.
 	"""

@@ -1,15 +1,13 @@
 from django import forms
-from django.conf import settings
-
-from cms.api import create_page
+from django.template.defaultfilters import slugify
 
 from ajax_select.fields import AutoCompleteField
 
-from cms_media_gallery.models import CMSMediaGallery
+from cms_media_gallery.models import Collection, MediaGallery
 
 class GalleryForm(forms.ModelForm):
 
-    parent  = AutoCompleteField('cms_media_gallery_page', label='Client')
+    collection  = AutoCompleteField('media_gallery_collection', label='Client')
 
     def __init__(self, *args, **kwargs):
         if 'edit' in kwargs:
@@ -17,12 +15,23 @@ class GalleryForm(forms.ModelForm):
         else:
             edit = False
         super(GalleryForm, self).__init__(*args, **kwargs)
-        if edit:
-            self.fields['publish'] = forms.BooleanField(initial=False)
+        if edit is False:
+            self.fields['published'].widget = forms.HiddenInput()
+
+    def clean_collection(self):
+        collection = self.cleaned_data['collection']
+        slug = slugify(collection)
+        try:
+            collection = Collection.objects.get(pk=slug, name=collection)
+        except Collection.DoesNotExist:
+            collection = Collection.objects.create(pk=slug)
+        return collection
+
 
     class Meta:
-        model = CMSMediaGallery
+        model = MediaGallery
         widgets = {
             'name': forms.TextInput(attrs={'class':'input-large'}),
             'slug': forms.TextInput(attrs={'class':'input-large'}),
         }
+        exclude = ('protect')
