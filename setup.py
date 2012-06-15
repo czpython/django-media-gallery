@@ -15,7 +15,6 @@ setup(
         'pylibmc',
         'django-pylibmc',
         'sorl-thumbnail',
-        'django-cms',
         'django-ajax-selects',
     ],
 )

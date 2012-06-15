@@ -5,14 +5,10 @@ from django.contrib.contenttypes import generic
 
 from uploadit.models import UploadedFile
 
+from django_pwd_this.models import Password
+
 from cms_media_gallery.managers import MediaGalleryManager
 
-class PasswordProtect(models.Model):
-    name = models.CharField(max_length=50, blank=True)
-    password = models.CharField(max_length=85)
-
-    def __unicode__(self):
-        return self.name
 
 class Collection(models.Model):
     name = models.CharField(max_length=75)
@@ -29,7 +25,9 @@ class MediaGallery(models.Model):
     # Neccessary for django-uploadit
     created_on = models.DateTimeField(auto_now_add=True)
     collection = models.ForeignKey(Collection, related_name='gallery_set')
-    protect = models.OneToOneField(PasswordProtect, related_name='media_gallery', blank=True, null=True)
+    lock = models.BooleanField(default=False, verbose_name='login Required', 
+        help_text="Prompts for a password when viewing this gallery.")
+    password = models.OneToOneField(Password, related_name='media_gallery', editable=False, blank=True, null=True)
     published = models.BooleanField(default=False)
     pictures = generic.GenericRelation(UploadedFile, content_type_field='parent_type', object_id_field='parent_id')
     objects = MediaGalleryManager()
@@ -57,6 +55,10 @@ class MediaGallery(models.Model):
             # 1 indexed
             positions[picture.id] = pos + 1
         return positions
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('media-gallery', [self.collection.slug, self.slug])
 
 
 

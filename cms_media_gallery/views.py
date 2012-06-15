@@ -21,6 +21,8 @@ from celery.result import TaskSetResult
 from uploadit.tasks import upload_images as image_uploader
 from uploadit.models import UploadedFile
 
+from django_pwd_this.utils import create_pwd
+
 from cms_media_gallery.models import MediaGallery, Collection
 from cms_media_gallery.forms import GalleryForm
 from cms_media_gallery import signals
@@ -51,14 +53,36 @@ def create_gallery(request):
         return HttpResponseRedirect(reverse('gallery-upload-images', args=[instance.pk]))
     return render_to_response('media-gallery/add.html', {'form': form}, context_instance=RequestContext(request))
 
+@never_cache
 @login_required
 def edit_gallery(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
-    form = GalleryForm(request.POST or None, edit=True, instance=gallery)
+    gallery_url = gallery.get_absolute_url()
+    password = getattr(gallery.password, 'password', '')
+    form = GalleryForm(request.POST or None, edit=True, instance=gallery, initial={'password': password})
     if form.is_valid():
-        instance = form.save()
+        instance = form.save(commit=False)
+        pwd = instance.password
+        # Makes sure to only update the password if its required.
+        # sets it to "Active".
+        if instance.lock and pwd is not None:
+            pwd.password = form.cleaned_data['password']
+            pwd.active = True
+            pwd.save()
+        # Check if lock is true and if there's not a password associated with this gallery.
+        # if so then create it.
+        elif instance.lock and not pwd:
+            new = create_pwd(path=gallery_url, password=form.cleaned_data['password'])
+            instance.password = new
+        # Mark the password object associated with this gallery as "Inactive".
+        elif not instance.lock and pwd:
+            pwd.active = False
+            pwd.save()
+        instance.save()
         messages.success(request, 'Gallery has been edited succesfully.')
-    return render_to_response('media-gallery/edit.html', {'form': form, 'gallery': gallery}, context_instance=RequestContext(request))
+    return render_to_response('media-gallery/edit.html', 
+        {'form': form, 'gallery': gallery}, 
+        context_instance=RequestContext(request))
 
 @login_required
 def upload_images(request, slug):
