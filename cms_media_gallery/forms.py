@@ -28,7 +28,7 @@ class GalleryForm(forms.ModelForm):
         collection = self.cleaned_data['collection']
         slug = slugify(collection)
         try:
-            collection = Collection.objects.get(pk=slug, name=collection)
+            collection = Collection.objects.get(pk=slug)
         except Collection.DoesNotExist:
             collection = Collection.objects.create(pk=slug, name=collection)
         return collection
