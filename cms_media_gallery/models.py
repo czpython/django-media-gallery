@@ -2,6 +2,7 @@ import random
 
 from django.db import models
 from django.contrib.contenttypes import generic
+from  django.conf import settings
 
 from uploadit.models import UploadedFile
 
