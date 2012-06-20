@@ -9,6 +9,11 @@ from django_pwd_this.models import Password
 
 from cms_media_gallery.managers import MediaGalleryManager
 
+try:
+    # This is defined for django-uploadit
+    UPLOADIT_OBJECTS_ORDERING = settings.UPLOADIT_OBJECTS_ORDERING
+except AttributeError:
+    UPLOADIT_OBJECTS_ORDERING = ['id',]
 
 class Collection(models.Model):
     name = models.CharField(max_length=75)
@@ -49,7 +54,7 @@ class MediaGallery(models.Model):
                 return self._thumbail
 
     def get_picture_positions(self):
-        pictures = self.pictures.all().order_by('id')
+        pictures = self.pictures.all().order_by(*UPLOADIT_OBJECTS_ORDERING)
         positions = {}
         for pos, picture in enumerate(pictures):
             # 1 indexed
