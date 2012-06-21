@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.shortcuts import render_to_response, get_object_or_404
-from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.views.decorators.cache import never_cache
 from django.db import transaction
@@ -26,8 +25,6 @@ from django_pwd_this.utils import create_pwd
 from cms_media_gallery.models import MediaGallery, Collection
 from cms_media_gallery.forms import GalleryForm
 from cms_media_gallery import signals
-
-UPLOADIT_TEMP_FILES = settings.UPLOADIT_TEMP_FILES
 
 
 @never_cache
@@ -99,14 +96,14 @@ def upload_images(request, slug):
             del request.session['uploadit-%s' % gallery.slug]
             result.delete()
             if request.POST:
-                task = image_uploader(gallery, gallery.created_on, UPLOADIT_TEMP_FILES)
+                task = image_uploader(gallery, gallery.created_on)
                 request.session['uploadit-%s' % gallery.slug] = task.taskset_id
                 messages.success(request, 'Your files have been submitted succesfully.')
                 return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
         else:
             messages.warning(request, "I'm are currently uploading some files, give it some time until you upload again.")
     elif request.POST:
-        task = image_uploader(gallery, gallery.created_on, UPLOADIT_TEMP_FILES)
+        task = image_uploader(gallery, gallery.created_on)
         request.session['uploadit-%s' % gallery.slug] = task.taskset_id
         messages.success(request, 'Your files have been submitted succesfully.')
         return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
@@ -189,8 +186,11 @@ def view_gallery(request, collection, gallery, template="media-gallery/gallery.h
     gallery = get_object_or_404(collection.gallery_set.all(), slug=gallery)
     if gallery.published is False and not request.user.is_authenticated():
         raise Http404
+    # Client required me to add extra sorting...
+    # might as well.
+    images = gallery.pictures.ordered(gallery)
     context = {
-        'images': gallery.pictures.all(),
+        'images': images,
         'gallery': gallery,
     }
     if extra_context is not None:

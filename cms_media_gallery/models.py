@@ -55,7 +55,7 @@ class MediaGallery(models.Model):
                 return self._thumbail
 
     def get_picture_positions(self):
-        pictures = self.pictures.all().order_by(*UPLOADIT_OBJECTS_ORDERING)
+        pictures = self.pictures.ordered(self)
         positions = {}
         for pos, picture in enumerate(pictures):
             # 1 indexed
