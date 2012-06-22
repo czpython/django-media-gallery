@@ -122,6 +122,7 @@ def delete_gallery(request, slug):
     response = simplejson.dumps(data)
     return HttpResponse(response, mimetype='application/json')
 
+
 @login_required
 def delete_image(request, slug, img):
     gallery = get_object_or_404(MediaGallery, pk=slug)

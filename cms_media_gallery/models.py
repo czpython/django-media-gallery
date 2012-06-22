@@ -38,9 +38,12 @@ class MediaGallery(models.Model):
     pictures = generic.GenericRelation(UploadedFile, content_type_field='parent_type', object_id_field='parent_id')
     objects = MediaGalleryManager()
 
-    @property
     def get_pictures(self):
-        return self.pictures.all()
+        try:
+            images = self.ordered_images
+        except AttributeError:
+            self.ordered_images = self.pictures.ordered(self)
+        return self.ordered_images
 
     @property
     def thumbail(self):
