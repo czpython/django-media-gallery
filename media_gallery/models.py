@@ -6,7 +6,7 @@ from  django.conf import settings
 
 from uploadit.models import UploadedFile
 
-from django_pwd_this.models import Password
+from pwd_this.models import Password
 
 from media_gallery.managers import MediaGalleryManager
 
