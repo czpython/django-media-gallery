@@ -15,7 +15,12 @@ from endless_pagination.decorators import page_template
 
 from sorl.thumbnail import delete
 
-from celery.result import TaskSetResult
+try:
+    from celery.result import GroupResult
+except AttributeError, e:
+    # Celery 2.x fallback
+    from celery.result import TaskSetResult as GroupResult
+
 
 from uploadit.tasks import upload_images as image_uploader
 from uploadit.models import UploadedFile
@@ -86,7 +91,7 @@ def upload_images(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     taskset_id = request.session.get('uploadit-%s' % gallery.slug, False)
     if taskset_id:
-        result = TaskSetResult.restore(taskset_id)
+        result = GroupResult.restore(taskset_id)
         if result.failed():
             del request.session['uploadit-%s' % gallery.slug]
             result.delete()
@@ -97,14 +102,14 @@ def upload_images(request, slug):
             result.delete()
             if request.POST:
                 task = image_uploader(gallery, gallery.created_on)
-                request.session['uploadit-%s' % gallery.slug] = task.taskset_id
+                request.session['uploadit-%s' % gallery.slug] = getattr(task, 'id') or getattr(task, 'taskset_id', None)
                 messages.success(request, 'Your files have been submitted succesfully.')
                 return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
         else:
             messages.warning(request, "I'm are currently uploading some files, give it some time until you upload again.")
     elif request.POST:
         task = image_uploader(gallery, gallery.created_on)
-        request.session['uploadit-%s' % gallery.slug] = task.taskset_id
+        request.session['uploadit-%s' % gallery.slug] = getattr(task, 'id') or getattr(task, 'taskset_id', None)
         messages.success(request, 'Your files have been submitted succesfully.')
         return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
     return render_to_response('media-gallery/upload_images.html', 
