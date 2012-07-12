@@ -2,7 +2,7 @@ from django.db import models
 
 class MediaGalleryManager(models.Manager):
 	"""
-		Default manager wrapper for CMSMediaGallery.
+		Default manager wrapper for MediaGallery.
 	"""
 
 	def with_images(self):

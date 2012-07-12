@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 
 
-urlpatterns = patterns('cms_media_gallery.views',
+urlpatterns = patterns('media_gallery.views',
 	url(r'^media-gallery/dashboard/$', 'dashboard', name="gallery-dashboard"),
     url(r'^media-gallery/create/$', 'create_gallery', name="gallery-create"),
     url(r'^media-gallery/(?P<slug>[-\w]+)/edit/$', 'edit_gallery', name="gallery-edit"),

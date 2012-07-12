@@ -8,7 +8,7 @@ from uploadit.models import UploadedFile
 
 from django_pwd_this.models import Password
 
-from cms_media_gallery.managers import MediaGalleryManager
+from media_gallery.managers import MediaGalleryManager
 
 
 class Collection(models.Model):

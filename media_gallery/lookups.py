@@ -1,4 +1,4 @@
-from cms_media_gallery.models import Collection
+from media_gallery.models import Collection
 
 from ajax_select import LookupChannel
 

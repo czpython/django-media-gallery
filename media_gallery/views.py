@@ -20,11 +20,11 @@ from celery.result import TaskSetResult
 from uploadit.tasks import upload_images as image_uploader
 from uploadit.models import UploadedFile
 
-from django_pwd_this.utils import create_pwd
+from pwd_this.utils import create_pwd
 
-from cms_media_gallery.models import MediaGallery, Collection
-from cms_media_gallery.forms import GalleryForm
-from cms_media_gallery import signals
+from media_gallery import signals
+from media_gallery.models import MediaGallery, Collection
+from media_gallery.forms import GalleryForm
 
 
 @never_cache

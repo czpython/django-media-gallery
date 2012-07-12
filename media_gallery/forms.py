@@ -3,7 +3,7 @@ from django.template.defaultfilters import slugify
 
 from ajax_select.fields import AutoCompleteField
 
-from cms_media_gallery.models import Collection, MediaGallery
+from media_gallery.models import Collection, MediaGallery
 
 
 
