@@ -1,5 +1,5 @@
-{% extends "cms_media_gallery/base.html" %}
-{% load thumbnail cms_tags menu_tags %}
+{% extends "media-gallery/base.html" %}
+{% load thumbnail %}
 {% block extra-style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
 <link rel="stylesheet" href="{{ STATIC_URL }}iphone-style-checkboxes/css/style.css">
@@ -9,27 +9,26 @@
 <form action="" class=".form-vertical" method="post">{% csrf_token %}
     <fieldset>
         {% for field in form %}
-        <div class="control-group {% if field.errors %}error{% endif %}">
+        <div {% if field.label|lower == "password" and not gallery.lock and not field.errors %}style="display:none;"{% endif %}class="control-group {{ field.label|lower }} {% if field.errors %}error{% endif %}">
             {{ field.label_tag }}
             <div class="controls">
                 {{ field }}
-                {% if field.help_text %}
-                <p class="help-block">{{ field.help_text }}</p>
-                {% endif %}
+                {{ field.errors }}
             </div>
-            {{ field.errors }}
+            {% if field.help_text %}
+            <p class="help-block">{{ field.help_text }}</p>
+            {% endif %}
         </div>
         {% endfor %}
   </fieldset>
     <input type="submit" class="btn btn-large btn-primary" value="Done" />
 </form>
-{% if not gallery.cms_page.published %}
+{% if not gallery.published %}
 <p>Preview your gallery here</p>
-<a href="{% page_url gallery.cms_page %}?preview">{{ gallery.name }}</a>
 {% else %}
 <p>View your gallery live !!!</p>
-<a href="{% page_url gallery.cms_page %}">{{ gallery.name }}</a>
 {% endif %}
+<a href="{% url media-gallery gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
 <ul class="thumbnails">
 {% for picture in gallery.get_pictures %}
 {% thumbnail picture.file "200x200" crop="center" as im %}
@@ -49,10 +48,24 @@
 <script src="{{ STATIC_URL }}iphone-style-checkboxes/js/iphone-style-checkboxes.js" type="text/javascript"></script>
 <script type="text/javascript"> 
     $(document).ready(function (){ 
-        $(':checkbox').iphoneStyle({
+        $('#id_published').iphoneStyle({
             onChange: function(elem, value) {
                 $.getJSON("{% url gallery-publish gallery.slug %}", {publish:value.toString()});
             }
+        });
+        $('#id_lock').iphoneStyle({
+            onChange: function(elem, value) {
+                var val = value.toString();
+                if (val === 'true'){
+                    $(".control-group.password").show("fast");
+                }
+                else{
+                    $(".control-group.password").hide("fast");
+                }
+
+            },
+            checkedLabel: 'Yes',
+            uncheckedLabel: 'No'
         });
     }); 
 </script>
