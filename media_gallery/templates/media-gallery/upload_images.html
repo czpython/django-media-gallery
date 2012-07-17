@@ -72,7 +72,7 @@ $(function() {
             {title : "Image files", extensions : "jpg,png,jpeg"},
         ],
 
-        multipart_params: {pk: "{{ gallery.pk }}"}
+        multipart_params: {groupid: "{{ gallery.pk }}"}
     });
 
     uploader.init();

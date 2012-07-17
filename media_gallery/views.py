@@ -15,15 +15,7 @@ from endless_pagination.decorators import page_template
 
 from sorl.thumbnail import delete
 
-try:
-    from celery.result import GroupResult
-except AttributeError, e:
-    # Celery 2.x fallback
-    from celery.result import TaskSetResult as GroupResult
-
-
-from uploadit.tasks import upload_images as image_uploader
-from uploadit.models import UploadedFile
+from uploadit.models import UploadedFile, FileGroup
 
 from pwd_this.utils import create_pwd
 
@@ -49,7 +41,9 @@ def dashboard(request):
 def create_gallery(request):
     form = GalleryForm(request.POST or None)
     if form.is_valid():
-        instance = form.save()
+        instance = form.save(commit=False)
+        instance.pictures = FileGroup.objects.create(identifier=instance.slug)
+        instance.save()
         signals.media_gallery_created.send(sender=None, gallery=instance)
         messages.success(request, 'Your gallery has been succesfully created. Now add images to it :)')
         return HttpResponseRedirect(reverse('gallery-upload-images', args=[instance.pk]))
@@ -89,27 +83,7 @@ def edit_gallery(request, slug):
 @login_required
 def upload_images(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
-    taskset_id = request.session.get('uploadit-%s' % gallery.slug, False)
-    if taskset_id:
-        result = GroupResult.restore(taskset_id)
-        if result.failed():
-            del request.session['uploadit-%s' % gallery.slug]
-            result.delete()
-            messages.error(request, "Oops, We have encountered an error while uploading your file. Please try again later...")
-        elif result.ready() and result.successful():
-            # Remove the old task id and result
-            del request.session['uploadit-%s' % gallery.slug]
-            result.delete()
-            if request.POST:
-                task = image_uploader(gallery, gallery.created_on)
-                request.session['uploadit-%s' % gallery.slug] = getattr(task, 'id') or getattr(task, 'taskset_id', None)
-                messages.success(request, 'Your files have been submitted succesfully.')
-                return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
-        else:
-            messages.warning(request, "I'm are currently uploading some files, give it some time until you upload again.")
-    elif request.POST:
-        task = image_uploader(gallery, gallery.created_on)
-        request.session['uploadit-%s' % gallery.slug] = getattr(task, 'id') or getattr(task, 'taskset_id', None)
+    if request.POST:
         messages.success(request, 'Your files have been submitted succesfully.')
         return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
     return render_to_response('media-gallery/upload_images.html', 
@@ -150,7 +124,7 @@ def publish_gallery(request, slug):
     """
         Publishes or unpublishes a gallery.
     """
-    gallery = get_object_or_404(MediaGallery, slug=slug)
+    gallery = get_object_or_404(MediaGallery, pk=slug)
     publish = request.GET.get('publish', 'false')
     data = {'success' : "1"}
 
@@ -189,12 +163,12 @@ def view_galleries(request, collection, template="media-gallery/collection.html"
 def view_gallery(request, collection, gallery, template="media-gallery/gallery.html",
     extra_context=None):
     collection = get_object_or_404(Collection, slug=collection)
-    gallery = get_object_or_404(collection.gallery_set.all(), slug=gallery)
+    gallery = get_object_or_404(collection.gallery_set.all(), pk=gallery)
     if gallery.published is False and not request.user.is_authenticated():
         raise Http404
     # Client required me to add extra sorting...
     # might as well.
-    images = gallery.pictures.ordered(gallery)
+    images = gallery.pictures.get_files()
     context = {
         'images': images,
         'gallery': gallery,

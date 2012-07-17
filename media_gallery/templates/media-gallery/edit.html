@@ -30,7 +30,7 @@
 {% endif %}
 <a href="{% url media-gallery gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
 <ul class="thumbnails">
-{% for picture in gallery.get_pictures %}
+{% for picture in gallery.pictures.get_files %}
 {% thumbnail picture.file "200x200" crop="center" as im %}
     <li class=".span3">
     <div class="thumbnail">

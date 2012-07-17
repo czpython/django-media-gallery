@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.contenttypes import generic
 from  django.conf import settings
 
-from uploadit.models import UploadedFile
+from uploadit.models import FileGroup
 
 from pwd_this.models import Password
 
@@ -30,15 +30,8 @@ class MediaGallery(models.Model):
         help_text="Prompts for a password when viewing this gallery.")
     password = models.OneToOneField(Password, related_name='media_gallery', editable=False, blank=True, null=True)
     published = models.BooleanField(default=False)
-    pictures = generic.GenericRelation(UploadedFile, content_type_field='parent_type', object_id_field='parent_id')
+    pictures = models.ForeignKey(FileGroup, null=True, blank=True)
     objects = MediaGalleryManager()
-
-    def get_pictures(self):
-        try:
-            images = self.ordered_images
-        except AttributeError:
-            self.ordered_images = self.pictures.ordered(self)
-        return self.ordered_images
 
     @property
     def thumbail(self):
@@ -53,7 +46,7 @@ class MediaGallery(models.Model):
                 return self._thumbail
 
     def get_picture_positions(self):
-        pictures = self.pictures.ordered(self)
+        pictures = self.pictures.get_files()
         positions = {}
         for pos, picture in enumerate(pictures):
             # 1 indexed
