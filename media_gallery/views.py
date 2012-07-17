@@ -97,7 +97,7 @@ def delete_gallery(request, slug):
     data = {"success" : "1"}
     files = gallery.pictures.get_files()
     # Need to individually delete the cached thumbnail.
-    for file_ in files
+    for file_ in files:
         delete(file_.file)
     gallery.delete()
     response = simplejson.dumps(data)
