@@ -95,7 +95,9 @@ def upload_images(request, slug):
 def delete_gallery(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     data = {"success" : "1"}
-    for file_ in gallery.pictures.all():
+    files = gallery.pictures.get_files()
+    # Need to individually delete the cached thumbnail.
+    for file_ in files
         delete(file_.file)
     gallery.delete()
     response = simplejson.dumps(data)
@@ -107,7 +109,7 @@ def delete_image(request, slug, img):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     data = {"success" : "1"}
     try:
-        file_ = gallery.pictures.get(pk=img)
+        file_ = gallery.pictures.objects.get(pk=img)
     except UploadedFile.DoesNotExist:
         data['success'] = "0"
     else:
