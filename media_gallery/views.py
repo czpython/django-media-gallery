@@ -31,7 +31,7 @@ def dashboard(request):
         Dislays all galleries that have images.
     """
 
-    galleries = MediaGallery.objects.with_images()
+    galleries = MediaGallery.objects.all()
     
     return render_to_response('media-gallery/dashboard.html', 
         {'galleries': galleries}, context_instance=RequestContext(request))

@@ -8,8 +8,6 @@ from uploadit.models import FileGroup
 
 from pwd_this.models import Password
 
-from media_gallery.managers import MediaGalleryManager
-
 
 class Collection(models.Model):
     name = models.CharField(max_length=75)
@@ -31,7 +29,6 @@ class MediaGallery(models.Model):
     password = models.OneToOneField(Password, related_name='media_gallery', editable=False, blank=True, null=True)
     published = models.BooleanField(default=False)
     pictures = models.ForeignKey(FileGroup, null=True, blank=True)
-    objects = MediaGalleryManager()
 
     @property
     def thumbail(self):
@@ -42,7 +39,7 @@ class MediaGallery(models.Model):
             return self._thumbail
         except AttributeError:
             if self.pictures is not None:
-                self._thumbail = random.choice(self.pictures.all())
+                self._thumbail = random.choice(self.pictures.get_files())
                 return self._thumbail
 
     def get_picture_positions(self):
