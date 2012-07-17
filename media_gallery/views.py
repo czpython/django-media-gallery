@@ -109,7 +109,7 @@ def delete_image(request, slug, img):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     data = {"success" : "1"}
     try:
-        file_ = gallery.pictures.objects.get(pk=img)
+        file_ = gallery.pictures.files.get(pk=img)
     except UploadedFile.DoesNotExist:
         data['success'] = "0"
     else:
