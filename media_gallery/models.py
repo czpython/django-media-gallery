@@ -63,11 +63,11 @@ class MediaGallery(models.Model):
 
 
 def calc_image_path(instance, name):
-    return "%s/%s" % (instance.gallery.name, name)
+    return "%s/%s" % (instance.gallery.slug, name)
 
 
 def calc_thumbnail_path(instance, name):
-    return "%s/thumbnails/%s" % (instance.gallery.name, name)
+    return "%s/thumbnails/%s" % (instance.gallery.slug, name)
 
 
 class UploadedImage(models.Model):
