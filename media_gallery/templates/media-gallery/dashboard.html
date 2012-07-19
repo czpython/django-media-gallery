@@ -11,12 +11,12 @@
 {% for gallery in galleries %}
     <li class=".span3">
     <div class="thumbnail">
-        <a class="delete" href="{% url gallery-delete gallery.pk %}"><i class="icon-trash"></i></a>
         <a class "edit" href="{% url gallery-edit gallery.pk %}">
             <img src="{{ gallery.thumbnail.url }}" width="{{ gallery.thumbnail.width }}" height="{{ gallery.thumbnail.height }}" />
         </a>
+        <h3 style="text-align: center;">{{ gallery.name }}</h3>
+        <a title="Delete ?" rel="tooltip" class="delete" href="{% url gallery-delete gallery.pk %}"><i class="icon-trash"></i></a>
     </div>
-    <h3>{{ gallery.name }}</h3>
     </li>
 {% endfor %}
 </ul>
@@ -24,6 +24,7 @@
 
 {% block js %}
 <script type="text/javascript" src="{{ STATIC_URL }}Impromptu/js/jquery-impromptu.4.0.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap-tooltip.js"></script>
 <script type="text/javascript">
     $(".thumbnail a.delete").click(function (event) {
         event.preventDefault();
