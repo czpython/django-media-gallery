@@ -1,10 +1,12 @@
 {% extends "media-gallery/base.html" %}
-{% load thumbnail %}
+
 {% block extra-style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
 <link rel="stylesheet" href="{{ STATIC_URL }}iphone-style-checkboxes/css/style.css">
 {% endblock extra-style %}
+
 {% block title %}Edit a Gallery{% endblock %}
+
 {% block content %}
 <form action="" class=".form-vertical" method="post">{% csrf_token %}
     <fieldset>
@@ -30,18 +32,17 @@
 {% endif %}
 <a href="{% url media-gallery gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
 <ul class="thumbnails">
-{% for picture in gallery.pictures.get_files %}
-{% thumbnail picture.file "200x200" crop="center" as im %}
+{% for picture in gallery.images.all %}
     <li class=".span3">
     <div class="thumbnail">
         <a href="{% url gallery-delete-image gallery.slug picture.pk %}"><i class="icon-trash"></i></a>
-        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" />
+        <img src="{{ picture.thumbnail.url }}" width="{{ picture.thumbnail.width }}" height="{{ picture.thumbnail.height }}" />
     </div>
     </li>
-{% endthumbnail %}
 {% endfor %}
 </ul>
 {% endblock %}
+
 {% block js %}
 <script type="text/javascript" src="{{ STATIC_URL }}jQuery-Slugify-Plugin/jquery.slugify.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}Impromptu/js/jquery-impromptu.4.0.min.js"></script>

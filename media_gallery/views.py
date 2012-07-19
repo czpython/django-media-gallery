@@ -15,8 +15,6 @@ from endless_pagination.decorators import page_template
 
 from sorl.thumbnail import delete
 
-from uploadit.models import UploadedFile, FileGroup
-
 from pwd_this.utils import create_pwd
 
 from media_gallery import signals
@@ -42,7 +40,6 @@ def create_gallery(request):
     form = GalleryForm(request.POST or None)
     if form.is_valid():
         instance = form.save(commit=False)
-        instance.pictures = FileGroup.objects.create(identifier=instance.slug)
         instance.save()
         signals.media_gallery_created.send(sender=None, gallery=instance)
         messages.success(request, 'Your gallery has been succesfully created. Now add images to it :)')
@@ -59,7 +56,7 @@ def edit_gallery(request, slug):
     if form.is_valid():
         instance = form.save(commit=False)
         pwd = instance.password
-        # Makes sure to only update the password if its required.
+        # Makes sure to only update the password if its required and
         # sets it to "Active".
         if instance.lock and pwd is not None:
             pwd.password = form.cleaned_data['password']
@@ -83,7 +80,7 @@ def edit_gallery(request, slug):
 @login_required
 def upload_images(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
-    if request.POST:
+    if request.method == "POST":
         messages.success(request, 'Your files have been submitted succesfully.')
         return HttpResponseRedirect(reverse('gallery-edit', args=[gallery.pk]))
     return render_to_response('media-gallery/upload_images.html', 
@@ -95,27 +92,19 @@ def upload_images(request, slug):
 def delete_gallery(request, slug):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     data = {"success" : "1"}
-    files = gallery.pictures.get_files()
-    # Need to individually delete the cached thumbnail.
-    for file_ in files:
-        delete(file_.file)
     gallery.delete()
     response = simplejson.dumps(data)
     return HttpResponse(response, mimetype='application/json')
-
 
 @login_required
 def delete_image(request, slug, img):
     gallery = get_object_or_404(MediaGallery, pk=slug)
     data = {"success" : "1"}
     try:
-        file_ = gallery.pictures.files.get(pk=img)
-    except UploadedFile.DoesNotExist:
-        data['success'] = "0"
-    else:
-        # Need to delete the thumbnail Key Value Store reference
-        delete(file_.file)
+        file_ = gallery.images.get(pk=img)
         file_.delete()
+    except gallery.images.model.DoesNotExist:
+        data['success'] = "0"
     response = simplejson.dumps(data)
     return HttpResponse(response, mimetype='application/json')
 
@@ -170,7 +159,7 @@ def view_gallery(request, collection, gallery, template="media-gallery/gallery.h
         raise Http404
     # Client required me to add extra sorting...
     # might as well.
-    images = gallery.pictures.get_files()
+    images = gallery.images.get_custom_sorted()
     context = {
         'images': images,
         'gallery': gallery,

@@ -1,8 +1,12 @@
 {% extends "media-gallery/base.html" %}
+
 {% block extra-style %}
 <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <link rel="stylesheet" href="{{ STATIC_URL }}plupload/js/jquery.ui.plupload/css/jquery.ui.plupload.css" type="text/css" />
 {% endblock extra-style %}
+
+{% block title %}Upload Images{% endblock %}
+
 {% block content %}
 <form id="upload-form" action="" method="post" enctype="multipart/form-data">{% csrf_token %}
     <div class="row">
@@ -65,14 +69,14 @@ $(function() {
         // Disabled due to a bug that loses the original image name and creates blobs.
         //chunk_size : '1mb',
         container : 'upload',
-        unique_names : true,
+        unique_names : false,
         multiple_queues : true,
         // Specify what files to browse for
         filters : [
             {title : "Image files", extensions : "jpg,png,jpeg"},
         ],
 
-        multipart_params: {groupid: "{{ gallery.pk }}"}
+        multipart_params: {gallery: "{{ gallery.pk }}"}
     });
 
     uploader.init();

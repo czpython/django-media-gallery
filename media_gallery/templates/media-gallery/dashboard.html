@@ -1,25 +1,27 @@
 {% extends "media-gallery/base.html" %}
-{% load thumbnail %}
+
 {% block extra-style %}
 <link rel="stylesheet" href="{{ STATIC_URL }}Impromptu/css/default.css">
 {% endblock extra-style %}
-{% block title %}Dasboard{% endblock %}
+
+{% block title %}Dashboard{% endblock %}
+
 {% block content %}
 <ul class="thumbnails">
 {% for gallery in galleries %}
-{% thumbnail gallery.thumbail.file "200x200" crop="center" as im %}
     <li class=".span3">
     <div class="thumbnail">
-        <a class="delete" href="{% url gallery-delete gallery.slug %}"><i class="icon-trash"></i></a>
-        <a class "edit" href="{% url gallery-edit gallery.slug %}">
-            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" />
+        <a class="delete" href="{% url gallery-delete gallery.pk %}"><i class="icon-trash"></i></a>
+        <a class "edit" href="{% url gallery-edit gallery.pk %}">
+            <img src="{{ gallery.thumbnail.url }}" width="{{ gallery.thumbnail.width }}" height="{{ gallery.thumbnail.height }}" />
         </a>
     </div>
+    <h3>{{ gallery.name }}</h3>
     </li>
-{% endthumbnail %}
 {% endfor %}
 </ul>
 {% endblock %}
+
 {% block js %}
 <script type="text/javascript" src="{{ STATIC_URL }}Impromptu/js/jquery-impromptu.4.0.min.js"></script>
 <script type="text/javascript">
