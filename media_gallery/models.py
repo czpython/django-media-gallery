@@ -38,8 +38,9 @@ class MediaGallery(models.Model):
         try:
             return self._thumbnail
         except AttributeError:
-            if self.images is not None:
-                self._thumbnail = random.choice(self.images.all()).thumbnail
+            images = self.images.all()
+            if bool(images):
+                self._thumbnail = random.choice(images).thumbnail
                 return self._thumbnail
 
     def get_picture_positions(self):
@@ -75,8 +76,8 @@ class UploadedImage(models.Model):
         Extends the UploadedFile object.
         Adds a relationship to MediaGallery.
     """
-    image = models.ImageField(upload_to=calc_image_path)
-    thumbnail = models.ImageField(upload_to=calc_thumbnail_path)
+    image = models.ImageField(max_length=250, upload_to=calc_image_path)
+    thumbnail = models.ImageField(max_length=250, upload_to=calc_thumbnail_path)
     gallery = models.ForeignKey(MediaGallery, related_name='images')
     upload_date = models.DateTimeField(auto_now_add=True)
 
