@@ -30,12 +30,12 @@
 {% else %}
 <p>View your gallery live !!!</p>
 {% endif %}
-<a href="{% url media-gallery gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
+<a href="{% url "media-gallery" gallery.collection.slug gallery.slug %}">{{ gallery.name }}</a>
 <ul class="thumbnails">
 {% for picture in gallery.images.all %}
     <li class=".span3">
     <div class="thumbnail">
-        <a href="{% url gallery-delete-image gallery.slug picture.pk %}"><i class="icon-trash"></i></a>
+        <a href="{% url "gallery-delete-image" gallery.slug picture.pk %}"><i class="icon-trash"></i></a>
         <img src="{{ picture.thumbnail.url }}" width="{{ picture.thumbnail.width }}" height="{{ picture.thumbnail.height }}" />
     </div>
     </li>
@@ -51,7 +51,7 @@
     $(document).ready(function (){ 
         $('#id_published').iphoneStyle({
             onChange: function(elem, value) {
-                $.getJSON("{% url gallery-publish gallery.slug %}", {publish:value.toString()});
+                $.getJSON("{% url "gallery-publish" gallery.slug %}", {publish:value.toString()});
             }
         });
         $('#id_lock').iphoneStyle({

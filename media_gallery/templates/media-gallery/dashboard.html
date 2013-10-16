@@ -11,11 +11,11 @@
 {% for gallery in galleries %}
     <li class=".span3">
     <div class="thumbnail">
-        <a class "edit" href="{% url gallery-edit gallery.pk %}">
+        <a class="edit" href="{% url "gallery-edit" gallery.pk %}">
             <img src="{{ gallery.thumbnail.url }}" width="{{ gallery.thumbnail.width }}" height="{{ gallery.thumbnail.height }}" />
         </a>
         <h3 style="text-align: center;">{{ gallery.name }}</h3>
-        <a title="Delete ?" rel="tooltip" class="delete" href="{% url gallery-delete gallery.pk %}"><i class="icon-trash"></i></a>
+        <a title="Delete ?" rel="tooltip" class="delete" href="{% url "gallery-delete" gallery.pk %}"><i class="icon-trash"></i></a>
     </div>
     </li>
 {% endfor %}

@@ -61,7 +61,7 @@ $(function() {
     var uploader = new plupload.Uploader({
         // General settings
         runtimes : 'html5, html4',
-        url : '{% url uploadit-upload-image %}',
+        url : '{% url "uploadit-upload-image" %}',
         max_file_size : '1000mb',
         max_file_count: 100,
         browse_button: 'add-files',
